@@ -1,0 +1,10 @@
+data/raw/
+data/processed/
+data/synthetic/*.json
+.env
+node_modules/
+.next/
+__pycache__/
+venv/
+.venv/
+*.parquet
