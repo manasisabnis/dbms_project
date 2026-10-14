@@ -1,0 +1,219 @@
+{
+  "window_years": 3,
+  "as_of": "2025-12-19",
+  "counts": {
+    "emerging": 74,
+    "declining": 68,
+    "established": 77,
+    "recent": 73,
+    "regular": 1672
+  },
+  "emerging": [
+    {
+      "case_id": 1530,
+      "case_name": "Fatima Begum v. Union of India",
+      "case_number": "AIR 2023 SC 790",
+      "total_citations": 35,
+      "recent": 35,
+      "previous": 0,
+      "growth_pct": 3500.0,
+      "label": "emerging"
+    },
+    {
+      "case_id": 315,
+      "case_name": "Sunita Devi v. National Bank",
+      "case_number": "AIR 1995 SC 361",
+      "total_citations": 90,
+      "recent": 64,
+      "previous": 4,
+      "growth_pct": 1500.0,
+      "label": "emerging"
+    },
+    {
+      "case_id": 1616,
+      "case_name": "Suresh Reddy v. Collector of Customs",
+      "case_number": "AIR 2014 SC 1674",
+      "total_citations": 71,
+      "recent": 62,
+      "previous": 4,
+      "growth_pct": 1450.0,
+      "label": "emerging"
+    },
+    {
+      "case_id": 659,
+      "case_name": "Priya Sharma v. Mohan Lal",
+      "case_number": "AIR 2004 SC 2130",
+      "total_citations": 114,
+      "recent": 87,
+      "previous": 6,
+      "growth_pct": 1350.0,
+      "label": "emerging"
+    },
+    {
+      "case_id": 417,
+      "case_name": "Sunita Devi v. Lakshmi Iyer",
+      "case_number": "AIR 1996 SC 92",
+      "total_citations": 99,
+      "recent": 67,
+      "previous": 5,
+      "growth_pct": 1240.0,
+      "label": "emerging"
+    }
+  ],
+  "declining": [
+    {
+      "case_id": 1543,
+      "case_name": "Union of India v. Meera Nair",
+      "case_number": "AIR 1984 SC 1346",
+      "total_citations": 73,
+      "recent": 1,
+      "previous": 11,
+      "growth_pct": -90.9,
+      "label": "declining"
+    },
+    {
+      "case_id": 664,
+      "case_name": "Sunita Devi v. State of Tamil Nadu",
+      "case_number": "AIR 2010 SC 2850",
+      "total_citations": 167,
+      "recent": 3,
+      "previous": 32,
+      "growth_pct": -90.6,
+      "label": "declining"
+    },
+    {
+      "case_id": 725,
+      "case_name": "State of Karnataka v. State of Tamil Nadu",
+      "case_number": "AIR 1999 SC 675",
+      "total_citations": 229,
+      "recent": 3,
+      "previous": 25,
+      "growth_pct": -88.0,
+      "label": "declining"
+    },
+    {
+      "case_id": 1754,
+      "case_name": "Municipal Corporation v. Fatima Begum",
+      "case_number": "AIR 2000 SC 653",
+      "total_citations": 207,
+      "recent": 4,
+      "previous": 31,
+      "growth_pct": -87.1,
+      "label": "declining"
+    },
+    {
+      "case_id": 190,
+      "case_name": "Ramesh Kumar v. Meera Nair",
+      "case_number": "AIR 2012 SC 652",
+      "total_citations": 140,
+      "recent": 4,
+      "previous": 30,
+      "growth_pct": -86.7,
+      "label": "declining"
+    }
+  ],
+  "established": [
+    {
+      "case_id": 262,
+      "case_name": "Union of India v. State of Kerala",
+      "case_number": "AIR 1981 SC 1581",
+      "total_citations": 701,
+      "recent": 49,
+      "previous": 48,
+      "growth_pct": 2.1,
+      "label": "established"
+    },
+    {
+      "case_id": 83,
+      "case_name": "Excise Commissioner v. Municipal Corporation",
+      "case_number": "AIR 1980 SC 2164",
+      "total_citations": 693,
+      "recent": 47,
+      "previous": 47,
+      "growth_pct": 0.0,
+      "label": "established"
+    },
+    {
+      "case_id": 1033,
+      "case_name": "Priya Sharma v. Sunita Devi",
+      "case_number": "AIR 1977 SC 1122",
+      "total_citations": 636,
+      "recent": 44,
+      "previous": 33,
+      "growth_pct": 33.3,
+      "label": "established"
+    },
+    {
+      "case_id": 654,
+      "case_name": "Sunita Devi v. Municipal Corporation",
+      "case_number": "AIR 1978 SC 1634",
+      "total_citations": 626,
+      "recent": 35,
+      "previous": 36,
+      "growth_pct": -2.8,
+      "label": "established"
+    },
+    {
+      "case_id": 533,
+      "case_name": "Suresh Reddy v. State of Kerala",
+      "case_number": "AIR 1975 SC 1249",
+      "total_citations": 623,
+      "recent": 24,
+      "previous": 29,
+      "growth_pct": -17.2,
+      "label": "established"
+    }
+  ],
+  "most_cited": [
+    {
+      "case_id": 262,
+      "case_name": "Union of India v. State of Kerala",
+      "case_number": "AIR 1981 SC 1581",
+      "total_citations": 701,
+      "recent": 49,
+      "previous": 48,
+      "growth_pct": 2.1,
+      "label": "established"
+    },
+    {
+      "case_id": 83,
+      "case_name": "Excise Commissioner v. Municipal Corporation",
+      "case_number": "AIR 1980 SC 2164",
+      "total_citations": 693,
+      "recent": 47,
+      "previous": 47,
+      "growth_pct": 0.0,
+      "label": "established"
+    },
+    {
+      "case_id": 1033,
+      "case_name": "Priya Sharma v. Sunita Devi",
+      "case_number": "AIR 1977 SC 1122",
+      "total_citations": 636,
+      "recent": 44,
+      "previous": 33,
+      "growth_pct": 33.3,
+      "label": "established"
+    },
+    {
+      "case_id": 654,
+      "case_name": "Sunita Devi v. Municipal Corporation",
+      "case_number": "AIR 1978 SC 1634",
+      "total_citations": 626,
+      "recent": 35,
+      "previous": 36,
+      "growth_pct": -2.8,
+      "label": "established"
+    },
+    {
+      "case_id": 533,
+      "case_name": "Suresh Reddy v. State of Kerala",
+      "case_number": "AIR 1975 SC 1249",
+      "total_citations": 623,
+      "recent": 24,
+      "previous": 29,
+      "growth_pct": -17.2,
+      "label": "established"
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+# data (big files stay local; never commit the dataset)
+data/raw/*
+data/processed/*
+data/synthetic/*
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+!data/synthetic/.gitkeep
+*.parquet
+
+# secrets
+.env
+
+# python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.pytest_cache/
+
+# node / next
+node_modules/
+.next/
+frontend/.env.local

@@ -1,0 +1,58 @@
+{
+  "case_id": 1530,
+  "case_name": "Fatima Begum v. Union of India",
+  "case_number": "AIR 2023 SC 790",
+  "as_of": "2025-12-19",
+  "total_citations": 35,
+  "label": "emerging",
+  "labels": {
+    "1": "regular",
+    "3": "emerging",
+    "5": "emerging"
+  },
+  "windows": {
+    "1": {
+      "recent": 13,
+      "previous": 18,
+      "growth_pct": -27.8
+    },
+    "3": {
+      "recent": 35,
+      "previous": 0,
+      "growth_pct": 3500.0
+    },
+    "5": {
+      "recent": 35,
+      "previous": 0,
+      "growth_pct": 3500.0
+    }
+  },
+  "yearly": [
+    {
+      "year": 2023,
+      "count": 5
+    },
+    {
+      "year": 2024,
+      "count": 18
+    },
+    {
+      "year": 2025,
+      "count": 12
+    }
+  ],
+  "by_court_level": [
+    {
+      "court_level": "Supreme Court",
+      "count": 28
+    },
+    {
+      "court_level": "High Court",
+      "count": 6
+    },
+    {
+      "court_level": "Lower Courts",
+      "count": 1
+    }
+  ]
+}
