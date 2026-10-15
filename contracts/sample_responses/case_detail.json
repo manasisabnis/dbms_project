@@ -1,0 +1,20 @@
+{
+  "case_id": 1530,
+  "case_name": "Fatima Begum v. Union of India",
+  "case_number": "AIR 2023 SC 790",
+  "judgment_date": "2023-03-14",
+  "court_name": "Supreme Court of India",
+  "court_level": "Supreme Court",
+  "case_type": "Civil Appeal",
+  "decision": "Appeal allowed in part. Matter remanded for fresh consideration.",
+  "pdf_url": null,
+  "judges": [
+    {"judge_id": 11, "name": "Justice A. Sample", "designation": "Judge", "role_in_case": "Author of the judgment"},
+    {"judge_id": 12, "name": "Justice B. Example", "designation": "Judge", "role_in_case": "Bench member"},
+    {"judge_id": 13, "name": "Justice C. Placeholder", "designation": "Chief Justice", "role_in_case": "Bench member"}
+  ],
+  "statutes": [
+    {"statute_id": 1, "act_name": "Constitution of India", "section": "Article 14", "description": "Equality before law", "enactment_year": 1950},
+    {"statute_id": 2, "act_name": "Code of Civil Procedure", "section": "Section 96", "description": "Appeal from original decree", "enactment_year": 1908}
+  ]
+}
