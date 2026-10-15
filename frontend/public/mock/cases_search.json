@@ -1,0 +1,14 @@
+{
+  "query": "",
+  "page": 1,
+  "page_size": 10,
+  "total": 6,
+  "results": [
+    {"case_id": 1530, "case_name": "Fatima Begum v. Union of India", "case_number": "AIR 2023 SC 790", "court_name": "Supreme Court of India", "judgment_date": "2023-03-14", "total_citations": 35},
+    {"case_id": 315, "case_name": "Sunita Devi v. National Bank", "case_number": "AIR 1995 SC 361", "court_name": "Supreme Court of India", "judgment_date": "1995-06-02", "total_citations": 210},
+    {"case_id": 1616, "case_name": "Suresh Reddy v. Collector of Customs", "case_number": "AIR 2014 SC 1674", "court_name": "Supreme Court of India", "judgment_date": "2014-09-19", "total_citations": 148},
+    {"case_id": 659, "case_name": "Priya Sharma v. Mohan Lal", "case_number": "AIR 2004 SC 2130", "court_name": "Supreme Court of India", "judgment_date": "2004-02-27", "total_citations": 173},
+    {"case_id": 417, "case_name": "Sunita Devi v. Lakshmi Iyer", "case_number": "AIR 1996 SC 92", "court_name": "Supreme Court of India", "judgment_date": "1996-11-08", "total_citations": 132},
+    {"case_id": 190, "case_name": "State of Karnataka v. State of Tamil Nadu", "case_number": "AIR 1999 SC 675", "court_name": "Supreme Court of India", "judgment_date": "1999-04-21", "total_citations": 96}
+  ]
+}
