@@ -18,7 +18,10 @@ app = FastAPI(title="Legal Case Citation Evolution Analyzer", version="0.1.0")
 # Lets the Next.js dev server call this API from the browser.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
+        allow_origins=[
+        "http://localhost:3000", "http://127.0.0.1:3000",
+        "http://localhost:3001", "http://127.0.0.1:3001",
+    ],
     allow_methods=["GET"],
     allow_headers=["*"],
 )
