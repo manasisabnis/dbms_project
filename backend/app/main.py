@@ -8,7 +8,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
 
-from backend.app.routers import trends
+from backend.app.routers import trends, cases
 # Person 1: add your routers here, e.g.
 #   from backend.app.routers import cases
 #   app.include_router(cases.router, prefix="/api")
@@ -27,6 +27,7 @@ app.add_middleware(
 )
 
 app.include_router(trends.router, prefix="/api")
+app.include_router(cases.router, prefix="/api")
 
 
 @app.get("/api/health")
