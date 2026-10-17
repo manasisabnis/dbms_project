@@ -16,7 +16,7 @@ PARQUET_PATH = (
       "indian_case_laws_structured_v1_year=2026.parquet"
 )
 
-BATCH_SIZE = 100
+BATCH_SIZE = 10
 
 SECTIONS_OUTPUT = Path("batch_citation_sections.csv")
 CITATIONS_OUTPUT = Path("extracted_citations.csv")
@@ -186,7 +186,8 @@ def main():
 
     rows = df[
         df["source_pdf_s3_url"].notna()
-        & df["neutral_citation"].notna()
+        & df["case_title"].notna()
+        & df["case_title"].astype(str).str.strip().ne("")
     ].head(BATCH_SIZE)
 
     session = requests.Session()

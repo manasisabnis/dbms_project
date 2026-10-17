@@ -8,3 +8,6 @@ mongomock>=4.1       # fake MongoDB used only in tests
 # Person 1: append your MySQL driver / SQLAlchemy / pandas lines below
 mysql-connector-python>=8.3
 pandas>=2.0
+
+requests>=2.31
+PyMuPDF>=1.24
