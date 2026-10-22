@@ -9,7 +9,7 @@ export const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:8000
  * The MongoDB endpoints (dashboard, citation-trend) are ALWAYS real.
  * When her API is ready, create frontend/.env.local containing:  NEXT_PUBLIC_USE_MOCKS=false
  */
-export const USE_MOCKS = process.env.NEXT_PUBLIC_USE_MOCKS !== "false";
+export const USE_MOCKS = process.env.NEXT_PUBLIC_USE_MOCKS === "true";
 
 export type Label = "emerging" | "declining" | "established" | "recent" | "regular";
 export type WindowYears = 1 | 3 | 5;
