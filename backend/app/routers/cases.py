@@ -15,6 +15,14 @@ CASE_FIELDS = {
     "case_number": 1,
     "judgment_date": 1,
     "court_name": 1,
+    "case_type": 1,
+    "decision": 1,
+    "location": 1,
+    "court_level": 1,
+    "cnr_number": 1,
+    "neutral_citation": 1,
+    "law_report_citation": 1,
+    "source_pdf_s3_url": 1,
 }
 
 
