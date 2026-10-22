@@ -35,25 +35,32 @@ function Loaded<T>({ state, children }: { state: ApiState<T>; children: (data: T
 export function OverviewTab({ detail, trend }: { detail: ApiState<CaseDetail>; trend: ApiState<CaseTrendResponse> }) {
   return (
     <div className="grid gap-4 lg:grid-cols-3">
-      <div className={`${BOX} lg:col-span-2`}>
+      <div className={`${BOX} min-w-0 lg:col-span-2`}>
         <h3 className="mb-3 font-semibold">Case information</h3>
         <Loaded state={detail}>
           {(d) => (
             <table className="w-full">
               <tbody>
-                <Row label="Case name" value={trend.data?.case_name ?? d.case_name} />
+                <Row label="Case ID" value={String(d.case_id)} />
+                <Row label="Case name" value={d.case_name} />
                 <Row label="Case number" value={d.case_number} />
                 <Row label="Judgment date" value={d.judgment_date} />
                 <Row label="Court" value={d.court_name} />
-                <Row label="Case type" value={d.case_type ?? "Not available in the current dataset"} />
-                <Row label="Decision" value={d.decision ?? "Not available in the current dataset"} />
-                <Row label="Judges" value={Array.isArray(d.judges) ? (d.judges.length ? `${d.judges.length} on the bench` : "No judges recorded") : "Not available in the current dataset"} />
+                <Row label="Court level" value={d.court_level} />
+                <Row label="Location" value={d.location} />
+                <Row label="Case type" value={d.case_type} />
+                <Row label="Case type basis" value={d.case_type_basis} />
+                <Row label="Decision" value={d.decision} />
+                <Row label="Bench" value={d.bench_name} />
+                <Row label="Judges" value={d.judges?.join(", ") || d.coram_members_text} />
+                <Row label="CNR number" value={d.cnr_number} />
+                <Row label="Neutral citation" value={d.neutral_citation} />
+                <Row label="Law report citation" value={d.law_report_citation} />
               </tbody>
             </table>
           )}
         </Loaded>
       </div>
-
       <div className="space-y-4">
         {trend.data ? (
           <>
@@ -67,13 +74,12 @@ export function OverviewTab({ detail, trend }: { detail: ApiState<CaseDetail>; t
             </div>
           </>
         ) : (
-          <Notice text={trend.loading ? "Loading citation statistics…" : "No citation statistics for this case yet."} />
+          <Notice text={trend.loading ? "Loading citation statistics..." : "No citation statistics for this case yet."} />
         )}
       </div>
     </div>
   );
 }
-
 export function AnalysisTab({ trend }: { trend: ApiState<CaseTrendResponse> }) {
   const [windowYears, setWindowYears] = useState<WindowYears>(3);
 
@@ -190,7 +196,6 @@ export function JudgesTab({ detail }: { detail: ApiState<CaseDetail> }) {
     </Loaded>
   );
 }
-
 export function StatutesTab({ detail }: { detail: ApiState<CaseDetail> }) {
   return (
     <Loaded state={detail}>
@@ -198,29 +203,31 @@ export function StatutesTab({ detail }: { detail: ApiState<CaseDetail> }) {
         const statutes = d.statutes ?? [];
 
         return statutes.length === 0 ? (
-          <Notice text="No statutes recorded for this case." />
+          <Notice text="Statute references are not populated for this case yet." />
         ) : (
           <div className={BOX}>
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b text-left text-xs text-slate-500">
-                  <th className="pb-2 font-medium">Act</th>
-                  <th className="pb-2 font-medium">Section</th>
-                  <th className="pb-2 font-medium">Description</th>
-                  <th className="pb-2 font-medium">Enacted</th>
-                </tr>
-              </thead>
-              <tbody>
-                {statutes.map((s) => (
-                  <tr key={s.statute_id} className="border-b last:border-0">
-                    <td className="py-2 font-medium">{s.act_name}</td>
-                    <td className="py-2 text-slate-600">{s.section ?? "-"}</td>
-                    <td className="py-2 text-slate-600">{s.description ?? "-"}</td>
-                    <td className="py-2 text-slate-600">{s.enactment_year ?? "-"}</td>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b text-left text-xs text-slate-500">
+                    <th className="pb-2 font-medium">Act</th>
+                    <th className="pb-2 font-medium">Section</th>
+                    <th className="pb-2 font-medium">Description</th>
+                    <th className="pb-2 font-medium">Enacted</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {statutes.map((s) => (
+                    <tr key={s.statute_id} className="border-b last:border-0">
+                      <td className="py-2 font-medium">{s.act_name}</td>
+                      <td className="py-2">{s.section ?? "-"}</td>
+                      <td className="py-2">{s.description ?? "-"}</td>
+                      <td className="py-2">{s.enactment_year ?? "-"}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         );
       }}
@@ -230,18 +237,53 @@ export function StatutesTab({ detail }: { detail: ApiState<CaseDetail> }) {
 export function FullTextTab({ detail }: { detail: ApiState<CaseDetail> }) {
   return (
     <Loaded state={detail}>
-      {(d) =>
-        d.pdf_url ? (
-          <div className={BOX}>
-            <p className="mb-3 text-sm text-slate-600">The full judgment is hosted as a PDF.</p>
-            <a href={d.pdf_url} target="_blank" rel="noreferrer" className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">
-              Open judgment PDF
-            </a>
+      {(d) => {
+        const pdf = d.pdf_url || d.source_pdf_s3_url;
+        const metadata = d.source_json_s3_url;
+
+        if (!pdf && !metadata) {
+          return <Notice text="No document source is recorded for this case." />;
+        }
+
+        const isArchive = Boolean(
+          pdf && (pdf.includes(".tar#") || pdf.endsWith(".tar"))
+        );
+
+        return (
+          <div className={`${BOX} space-y-4`}>
+            <h3 className="font-semibold">Judgment document sources</h3>
+
+            {pdf && (
+              <div>
+                <a
+                  href={pdf}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="break-all text-blue-700 underline"
+                >
+                  Open judgment source
+                </a>
+                {isArchive && (
+                  <p className="mt-2 text-sm text-amber-700">
+                    This judgment is referenced inside a TAR archive and may not open as a standalone PDF.
+                  </p>
+                )}
+              </div>
+            )}
+
+            {metadata && (
+              <a
+                href={metadata}
+                target="_blank"
+                rel="noreferrer"
+                className="block break-all text-blue-700 underline"
+              >
+                Open metadata source
+              </a>
+            )}
           </div>
-        ) : (
-          <Notice text="No PDF link is available for this case." />
-        )
-      }
+        );
+      }}
     </Loaded>
   );
 }
