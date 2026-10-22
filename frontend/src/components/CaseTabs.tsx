@@ -162,11 +162,6 @@ export function CitedByTab({ caseId }: { caseId: string }) {
 export function JudgesTab({ detail }: { detail: ApiState<CaseDetail> }) {
   return (
     <Loaded state={detail}>
-<<<<<<< Updated upstream
-      {(d) =>
-        !d.judges?.length ? (
-          <Notice text="Judge details are not available in the current dataset." />
-=======
       {(d) => {
         const judges = Array.isArray(d.judges) && d.judges.length
           ? d.judges
@@ -177,7 +172,6 @@ export function JudgesTab({ detail }: { detail: ApiState<CaseDetail> }) {
 
         return judges.length === 0 ? (
           <Notice text="No judges recorded for this case." />
->>>>>>> Stashed changes
         ) : (
           <div className={BOX}>
             <h3 className="font-semibold">
@@ -196,6 +190,7 @@ export function JudgesTab({ detail }: { detail: ApiState<CaseDetail> }) {
     </Loaded>
   );
 }
+
 export function StatutesTab({ detail }: { detail: ApiState<CaseDetail> }) {
   return (
     <Loaded state={detail}>
