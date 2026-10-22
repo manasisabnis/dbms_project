@@ -12,7 +12,9 @@ app = FastAPI(
     version="0.1.0",
 )
 
-local_origins = [
+fixed_origins = [
+    "https://astonishing-pithivier-b3484f.netlify.app",
+
     "http://localhost:3000",
     "http://127.0.0.1:3000",
     "http://localhost:3001",
@@ -27,7 +29,7 @@ configured_origins = [
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=list(dict.fromkeys(local_origins + configured_origins)),
+    allow_origins=list(dict.fromkeys(fixed_origins + configured_origins)),
     allow_methods=["GET"],
     allow_headers=["*"],
 )
