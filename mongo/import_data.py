@@ -40,29 +40,26 @@ def import_cases(db, path, reset=False) -> int:
     return processed
 
 
-def import_events(db, path, reset=False):
+def import_events(db, path, reset=False) -> int:
     collection = db["citation_events"]
 
     if reset:
         collection.delete_many({})
 
-    batch = []
-    total = 0
-
+    processed = 0
     for event in read_jsonl(path):
         event["citation_date"] = parse_date(event["citation_date"])
-        batch.append(event)
+        event["citing_case_id"] = int(event["citing_case_id"])
+        event["cited_case_id"] = int(event["cited_case_id"])
 
-        if len(batch) >= BATCH:
-            collection.insert_many(batch, ordered=False)
-            total += len(batch)
-            batch = []
+        pair = {
+            "citing_case_id": event["citing_case_id"],
+            "cited_case_id": event["cited_case_id"],
+        }
+        collection.replace_one(pair, event, upsert=True)
+        processed += 1
 
-    if batch:
-        collection.insert_many(batch, ordered=False)
-        total += len(batch)
-
-    return total
+    return processed
 
 
 if __name__ == "__main__":

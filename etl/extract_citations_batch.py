@@ -33,6 +33,11 @@ END_HEADING = re.compile(
     r"Subject\s+Index|"
     r"Case\s+Arising\s+From|"
     r"Appearances\s+for\s+Parties|"
+    r"Civil\s+Appellate\s+Jurisdiction|"
+    r"Criminal\s+Appellate\s+Jurisdiction|"
+    r"Original\s+Jurisdiction|"
+    r"Constitutional\s+Jurisdiction|"
+    r"The\s+Judgment\s+of\s+the\s+Court\s+was\s+delivered\s+by|"
     r"Judgment\s*/\s*Order\s+of\s+the\s+Supreme\s+Court"
     r")\b",
     re.IGNORECASE,
@@ -40,8 +45,8 @@ END_HEADING = re.compile(
 
 # Recognize reporter citations and common case-number identifiers.
 IDENTIFIER_PATTERN = re.compile(
-    r"\b(?:"
-    r"\d{4}\s+SCC\s+OnLine\s+[A-Za-z]+\s+\d+|"
+    r"(?:\[\s*(?:19|20)\d{2}\s*\]\s*\d{1,3}\s*(?:Suppl\.?\s*)?(?:S\.?C\.?R\.?|SCC)\s*\d+|"
+    r"\(\s*(?:19|20)\d{2}\s*\)\s*\d{1,3}\s*(?:Suppl\.?\s*)?(?:S\.?C\.?R\.?|SCC)\s*\d+|"
     r"\d{4}\s+SCC\s+OnLine\s+\w+\s+\d+|"
     r"\d{4}\s+INSC\s+\d+|"
     r"\d{4}\s+SCC\s+\d+|"
@@ -50,7 +55,7 @@ IDENTIFIER_PATTERN = re.compile(
     r"AIR\s+\d{4}\s+[A-Z]+\s+\d+|"
     r"SLP\s*\([^)]*\)\s*No\.?\s*[\w/-]+|"
     r"(?:Civil|Criminal)\s+Appeal\s+No\.?\s*[\w/-]+"
-    r")\b",
+    r")",
     re.IGNORECASE,
 )
 
@@ -114,7 +119,7 @@ def clean_report_noise(section):
 
 def extract_citation_section(text):
     """Extract the citation list and explicitly flag uncertain boundaries."""
-    start_match = re.search(r"Case\s+Law\s+Cited", text, re.IGNORECASE)
+    start_match = re.search(r"(?:Case\s+Law\s+(?:Cited|Reference|References)\b|List\s+of\s+Citations\s+and\s+Other\s+References\b)", text, re.IGNORECASE)
 
     if not start_match:
         return "", "NO_CASE_LAW_CITED_HEADING"
@@ -142,32 +147,38 @@ def extract_citation_section(text):
 
 
 def parse_citation_entries(section):
-    """
-    Split on semicolons, retaining the raw text.
-    This creates candidates, not verified database relationships.
-    """
+    """Parse citation candidates; split compact reporter-reference tables safely."""
     entries = []
+    reference_pattern = re.compile(
+        r"(?:\[\s*(?:19|20)\d{2}\s*\]|\(\s*(?:19|20)\d{2}\s*\)|\b(?:19|20)\d{2})"
+        r"\s*\d{1,3}\s*(?:Suppl\.?\s*)?(?:S\.?C\.?R\.?|SCC)\s*\d+",
+        re.IGNORECASE,
+    )
+    references = list(reference_pattern.finditer(section))
 
-    for raw in section.split(";"):
+    # In Supreme Court Reports PDFs, the front-matter table often looks like
+    # '[2012] 5 SCR 503 relied on Para 8 [2005] 3 Suppl. SCR 371 ...'.
+    # If several reporter IDs start at the beginning, split each into its own row.
+    if len(references) >= 2 and references[0].start() <= 80:
+        raw_entries = [
+            section[m.start():(references[i + 1].start() if i + 1 < len(references) else len(section))].strip()
+            for i, m in enumerate(references)
+        ]
+    else:
+        raw_entries = section.split(";")
+
+    for raw in raw_entries:
         raw = re.sub(r"\s+", " ", raw).strip(" \t\r\n;")
-
         if not raw:
             continue
-
         identifiers = IDENTIFIER_PATTERN.findall(raw)
-
         entries.append({
             "raw_citation_text": raw,
             "citation_identifiers": " | ".join(identifiers),
             "identifier_count": len(identifiers),
-            "mapping_status": (
-                "PENDING_REVIEW" if identifiers
-                else "NO_IDENTIFIER_PENDING_REVIEW"
-            ),
+            "mapping_status": "PENDING_REVIEW" if identifiers else "NO_IDENTIFIER_PENDING_REVIEW",
         })
-
     return entries
-
 
 def main():
     if not PARQUET_PATH.exists():
