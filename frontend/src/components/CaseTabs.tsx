@@ -17,14 +17,19 @@ function Notice({ text }: { text: string }) {
 }
 
 function Row({ label, value }: { label: string; value: string | null | undefined }) {
+  if (value == null || value.trim() === "" || value.trim() === "-") {
+    return null;
+  }
+
   return (
     <tr className="border-b last:border-0">
-      <th className="w-40 py-2 pr-4 text-left text-sm font-medium text-slate-500">{label}</th>
-      <td className="py-2 text-sm">{value || "-"}</td>
+      <th className="w-40 py-2 pr-4 text-left text-sm font-medium text-slate-500">
+        {label}
+      </th>
+      <td className="py-2 text-sm">{value}</td>
     </tr>
   );
 }
-
 /** Wraps the three states every detail tab has: loading, error, data. */
 function Loaded<T>({ state, children }: { state: ApiState<T>; children: (data: T) => React.ReactNode }) {
   if (state.error) return <Notice text={state.error} />;
@@ -73,9 +78,7 @@ export function OverviewTab({ detail, trend }: { detail: ApiState<CaseDetail>; t
               <p className="text-sm text-slate-600">{LABEL_EXPLANATION[trend.data.label]}</p>
             </div>
           </>
-        ) : (
-          <Notice text={trend.loading ? "Loading citation statistics..." : "No citation statistics for this case yet."} />
-        )}
+        ) : null}
       </div>
     </div>
   );
@@ -202,9 +205,7 @@ export function StatutesTab({ detail }: { detail: ApiState<CaseDetail> }) {
       {(d) => {
         const statutes = d.statutes ?? [];
 
-        return statutes.length === 0 ? (
-          <Notice text="Statute references are not populated for this case yet." />
-        ) : (
+        return statutes.length === 0 ? null : (
           <div className={BOX}>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">

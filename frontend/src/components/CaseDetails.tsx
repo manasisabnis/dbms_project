@@ -6,7 +6,7 @@ import { useState } from "react";
 import { AnalysisTab, CitedByTab, FullTextTab, JudgesTab, OverviewTab, StatutesTab } from "@/components/CaseTabs";
 import LabelBadge from "@/components/LabelBadge";
 import MockBanner from "@/components/MockBanner";
-import type { CaseDetail, CaseTrendResponse } from "@/lib/api";
+import type { CaseDetail, CaseTrendResponse, CitedByResponse } from "@/lib/api";
 import { useApi } from "@/lib/useApi";
 
 const TABS = ["Overview", "Citation Analysis", "Cited By", "Judges", "Statutes", "Full Text"] as const;
@@ -18,6 +18,35 @@ export default function CaseDetails() {
 
   const trend = useApi<CaseTrendResponse>(`/api/cases/${id}/citation-trend`); // MongoDB
   const detail = useApi<CaseDetail>(`/api/cases/${id}`); //                      MySQL
+
+  const citedBy = useApi<CitedByResponse>(
+    `/api/cases/${id}/citations?page=1&page_size=1`
+  );
+
+  const visibleTabs = TABS.filter((t) => {
+    if (t === "Overview") return true;
+    if (t === "Citation Analysis") return Boolean(trend.data);
+    if (t === "Cited By") return (citedBy.data?.total ?? 0) > 0;
+
+    const d = detail.data;
+    if (!d) return false;
+
+    if (t === "Judges") {
+      return Boolean(
+        (Array.isArray(d.judges) && d.judges.length > 0) ||
+        d.coram_members_text?.trim()
+      );
+    }
+
+    if (t === "Statutes") return Boolean(d.statutes?.length);
+
+    if (t === "Full Text") {
+      return Boolean(d.pdf_url || d.source_pdf_s3_url || d.source_json_s3_url);
+    }
+
+    return false;
+  });
+
 
   // Both failed: nothing to show for this id.
   if (trend.error && detail.error) {
@@ -49,7 +78,7 @@ export default function CaseDetails() {
       <MockBanner what="case information, judges, statutes and cited-by lists" />
 
       <nav className="flex flex-wrap gap-2 border-b border-slate-200">
-        {TABS.map((t) => (
+        {visibleTabs.map((t) => (
           <button
             key={t}
             onClick={() => setTab(t)}
