@@ -1,27 +1,33 @@
-"""FastAPI entry point.   Run from the repo root:
+"""FastAPI application for the Legal Case Citation Evolution Analyzer."""
+import os
 
-    uvicorn backend.app.main:app --reload
-
-Interactive docs: http://localhost:8000/docs
-"""
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
 
 from backend.app.routers import trends, cases
-# Person 1: add your routers here, e.g.
-#   from backend.app.routers import cases
-#   app.include_router(cases.router, prefix="/api")
 
-app = FastAPI(title="Legal Case Citation Evolution Analyzer", version="0.1.0")
+app = FastAPI(
+    title="Legal Case Citation Evolution Analyzer",
+    version="0.1.0",
+)
 
-# Lets the Next.js dev server call this API from the browser.
+local_origins = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "http://localhost:3001",
+    "http://127.0.0.1:3001",
+]
+
+configured_origins = [
+    origin.strip().rstrip("/")
+    for origin in os.getenv("CORS_ALLOWED_ORIGINS", "").split(",")
+    if origin.strip()
+]
+
 app.add_middleware(
     CORSMiddleware,
-        allow_origins=[
-        "http://localhost:3000", "http://127.0.0.1:3000",
-        "http://localhost:3001", "http://127.0.0.1:3001",
-    ],
+    allow_origins=list(dict.fromkeys(local_origins + configured_origins)),
     allow_methods=["GET"],
     allow_headers=["*"],
 )

@@ -1,89 +1,76 @@
-"""Read-only endpoints for relational legal-case records."""
+"""Read-only endpoints for legal cases stored in MongoDB."""
+import re
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 
-from backend.app.mysql_db import get_mysql_connection
+from backend.app.deps import get_db
 
 router = APIRouter(tags=["cases"])
+
+CASE_FIELDS = {
+    "_id": 0,
+    "case_id": 1,
+    "case_name": 1,
+    "case_number": 1,
+    "judgment_date": 1,
+    "court_name": 1,
+}
 
 
 @router.get("/cases")
 def search_cases(
     q: Optional[str] = Query(default=None, max_length=200),
     limit: int = Query(default=20, ge=1, le=100),
-    connection=Depends(get_mysql_connection),
+    db=Depends(get_db),
 ):
-    """List recent cases or search by case name/number."""
+    """List recent cases or search by case name or number."""
     try:
-        cursor = connection.cursor(dictionary=True)
+        query = {}
+
         if q and q.strip():
-            term = f"%{q.strip()}%"
-            cursor.execute(
-                """
-                SELECT c.case_id, c.case_name, c.case_number,
-                       c.judgment_date, c.case_type, c.decision,
-                       court.court_name
-                FROM LEGAL_CASE AS c
-                LEFT JOIN COURT AS court ON court.court_id = c.court_id
-                WHERE c.case_name LIKE %s OR c.case_number LIKE %s
-                ORDER BY c.judgment_date DESC, c.case_id DESC
-                LIMIT %s
-                """,
-                (term, term, limit),
-            )
-        else:
-            cursor.execute(
-                """
-                SELECT c.case_id, c.case_name, c.case_number,
-                       c.judgment_date, c.case_type, c.decision,
-                       court.court_name
-                FROM LEGAL_CASE AS c
-                LEFT JOIN COURT AS court ON court.court_id = c.court_id
-                ORDER BY c.judgment_date DESC, c.case_id DESC
-                LIMIT %s
-                """,
-                (limit,),
-            )
-        rows = cursor.fetchall()
+            term = re.escape(q.strip())
+            query = {
+                "$or": [
+                    {"case_name": {"$regex": term, "$options": "i"}},
+                    {"case_number": {"$regex": term, "$options": "i"}},
+                ]
+            }
+
+        rows = list(
+            db["case_catalog"]
+            .find(query, CASE_FIELDS)
+            .sort([("judgment_date", -1), ("case_id", -1)])
+            .limit(limit)
+        )
+
         return {"count": len(rows), "cases": rows}
+
     except Exception as exc:
         raise HTTPException(
-            status_code=500, detail="Unable to retrieve legal cases."
+            status_code=500,
+            detail="Unable to retrieve legal cases.",
         ) from exc
-    finally:
-        if "cursor" in locals():
-            cursor.close()
-        connection.close()
 
 
 @router.get("/cases/{case_id}")
-def get_case(case_id: int, connection=Depends(get_mysql_connection)):
-    """Retrieve one case and its court details."""
+def get_case(case_id: int, db=Depends(get_db)):
+    """Retrieve one case from the MongoDB case catalogue."""
     try:
-        cursor = connection.cursor(dictionary=True)
-        cursor.execute(
-            """
-            SELECT c.case_id, c.case_name, c.case_number,
-                   c.judgment_date, c.case_type, c.decision,
-                   court.court_name, court.location, court.court_level
-            FROM LEGAL_CASE AS c
-            LEFT JOIN COURT AS court ON court.court_id = c.court_id
-            WHERE c.case_id = %s
-            """,
-            (case_id,),
+        row = db["case_catalog"].find_one(
+            {"case_id": case_id},
+            CASE_FIELDS,
         )
-        row = cursor.fetchone()
+
         if row is None:
             raise HTTPException(status_code=404, detail="Case not found.")
+
         return row
+
     except HTTPException:
         raise
     except Exception as exc:
         raise HTTPException(
-            status_code=500, detail="Unable to retrieve the case."
+            status_code=500,
+            detail="Unable to retrieve the case.",
         ) from exc
-    finally:
-        if "cursor" in locals():
-            cursor.close()
-        connection.close()
