@@ -73,4 +73,52 @@ def get_case(case_id: int, db=Depends(get_db)):
         raise HTTPException(
             status_code=500,
             detail="Unable to retrieve the case.",
+        ) from exc\n
+
+@router.get("/landmark-cases")
+def landmark_cases(
+    limit: int = Query(default=5, ge=1, le=50),
+    db=Depends(get_db),
+):
+    """Return most-cited cases from MongoDB citation statistics."""
+    try:
+        docs = list(
+            db["case_window_stats"]
+            .find(
+                {"total_citations": {"$gt": 0}},
+                {
+                    "_id": 0,
+                    "case_id": 1,
+                    "case_name": 1,
+                    "case_number": 1,
+                    "judgment_date": 1,
+                    "total_citations": 1,
+                },
+            )
+            .sort([("total_citations", -1), ("case_id", 1)])
+            .limit(limit)
+        )
+
+        results = []
+        for doc in docs:
+            date = doc.get("judgment_date")
+            if hasattr(date, "isoformat"):
+                date = date.isoformat()[:10]
+            elif date:
+                date = str(date)[:10]
+
+            results.append({
+                "case_id": doc["case_id"],
+                "case_name": doc["case_name"],
+                "case_number": doc.get("case_number"),
+                "judgment_date": date or "",
+                "citation_count": int(doc.get("total_citations", 0)),
+            })
+
+        return {"results": results}
+    except Exception as exc:
+        raise HTTPException(
+            status_code=500,
+            detail="Unable to retrieve landmark cases.",
         ) from exc
+\n
