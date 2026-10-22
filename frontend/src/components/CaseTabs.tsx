@@ -45,9 +45,9 @@ export function OverviewTab({ detail, trend }: { detail: ApiState<CaseDetail>; t
                 <Row label="Case number" value={d.case_number} />
                 <Row label="Judgment date" value={d.judgment_date} />
                 <Row label="Court" value={d.court_name} />
-                <Row label="Case type" value={d.case_type} />
-                <Row label="Decision" value={d.decision} />
-                <Row label="Judges" value={d.judges.length ? `${d.judges.length} on the bench` : null} />
+                <Row label="Case type" value={d.case_type ?? "Not available in the current dataset"} />
+                <Row label="Decision" value={d.decision ?? "Not available in the current dataset"} />
+                <Row label="Judges" value={Array.isArray(d.judges) ? (d.judges.length ? `${d.judges.length} on the bench` : "No judges recorded") : "Not available in the current dataset"} />
               </tbody>
             </table>
           )}
@@ -163,8 +163,8 @@ export function JudgesTab({ detail }: { detail: ApiState<CaseDetail> }) {
   return (
     <Loaded state={detail}>
       {(d) =>
-        d.judges.length === 0 ? (
-          <Notice text="No judges recorded for this case." />
+        !d.judges?.length ? (
+          <Notice text="Judge details are not available in the current dataset." />
         ) : (
           <div className={BOX}>
             <table className="w-full text-sm">
@@ -196,8 +196,8 @@ export function StatutesTab({ detail }: { detail: ApiState<CaseDetail> }) {
   return (
     <Loaded state={detail}>
       {(d) =>
-        d.statutes.length === 0 ? (
-          <Notice text="No statutes recorded for this case." />
+        !d.statutes?.length ? (
+          <Notice text="Statute details are not available in the current dataset." />
         ) : (
           <div className={BOX}>
             <table className="w-full text-sm">
