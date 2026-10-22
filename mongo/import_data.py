@@ -1,18 +1,13 @@
-"""Load cases + citation events from JSONL files into MongoDB.
-
-    python -m mongo.import_data --cases data/synthetic/cases.jsonl \
-                                --events data/synthetic/citation_events.jsonl --reset
-
-Works for the synthetic files AND for Person 1's real files, as long as they
-follow contracts/data_contract.md.
-"""
+"""Import case catalog and citation events from JSONL into MongoDB."""
 from __future__ import annotations
 
 import argparse
 import json
 from datetime import datetime
+from pymongo import ReplaceOne
 
-BATCH = 5000
+
+BATCH = 1000
 
 
 def read_jsonl(path):
@@ -22,49 +17,70 @@ def read_jsonl(path):
                 yield json.loads(line)
 
 
-def parse_date(value: str) -> datetime:
-    return datetime.fromisoformat(value[:10])           # 'YYYY-MM-DD' -> datetime at midnight
-
-
-def _insert_in_batches(collection, docs) -> int:
-    batch, total = [], 0
-    for doc in docs:
-        batch.append(doc)
-        if len(batch) >= BATCH:
-            collection.insert_many(batch)
-            total += len(batch)
-            batch = []
-    if batch:
-        collection.insert_many(batch)
-        total += len(batch)
-    return total
+def parse_date(value):
+    return datetime.fromisoformat(value[:10])
 
 
 def import_cases(db, path, reset=False) -> int:
+    collection = db["case_catalog"]
+
     if reset:
-        db["case_catalog"].delete_many({})
-    docs = ({**c, "judgment_date": parse_date(c["judgment_date"])} for c in read_jsonl(path))
-    return _insert_in_batches(db["case_catalog"], docs)
+        collection.delete_many({})
+
+    processed = 0
+    for case in read_jsonl(path):
+        case["judgment_date"] = parse_date(case["judgment_date"])
+        collection.replace_one(
+            {"case_id": case["case_id"]},
+            case,
+            upsert=True,
+        )
+        processed += 1
+
+    return processed
 
 
 def import_events(db, path, reset=False) -> int:
+    collection = db["citation_events"]
+
     if reset:
-        db["citation_events"].delete_many({})
-    docs = ({**e, "citation_date": parse_date(e["citation_date"])} for e in read_jsonl(path))
-    return _insert_in_batches(db["citation_events"], docs)
+        collection.delete_many({})
+
+    processed = 0
+    for event in read_jsonl(path):
+        event["citation_date"] = parse_date(event["citation_date"])
+        event["citing_case_id"] = int(event["citing_case_id"])
+        event["cited_case_id"] = int(event["cited_case_id"])
+
+        pair = {
+            "citing_case_id": event["citing_case_id"],
+            "cited_case_id": event["cited_case_id"],
+        }
+        collection.replace_one(pair, event, upsert=True)
+        processed += 1
+
+    return processed
 
 
 if __name__ == "__main__":
     from common.settings import get_db
     from mongo.init_indexes import create_indexes
 
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--cases", required=True)
-    ap.add_argument("--events", required=True)
-    ap.add_argument("--reset", action="store_true", help="empty the collections first")
-    a = ap.parse_args()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--cases", required=True)
+    parser.add_argument("--events")
+    parser.add_argument("--reset", action="store_true")
+    args = parser.parse_args()
 
     db = get_db()
     create_indexes(db)
-    print("cases imported: ", import_cases(db, a.cases, a.reset))
-    print("events imported:", import_events(db, a.events, a.reset))
+
+    print("Cases processed:", import_cases(db, args.cases, args.reset))
+
+    if args.events:
+        print(
+            "Events imported:",
+            import_events(db, args.events, args.reset),
+        )
+    else:
+        print("Citation events unchanged (no --events supplied).")

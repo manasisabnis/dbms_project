@@ -21,3 +21,19 @@ venv/
 node_modules/
 .next/
 frontend/.env.local
+data/
+
+# Generated citation extraction and review outputs
+batch_citation_sections.csv
+extracted_citations.csv
+citation_match_report.csv
+citation_parquet_match_details.csv
+citation_parquet_match_report.csv
+citation_single_match_review.csv
+extraction_test.log
+
+# Local generated citation samples and repair backups
+citation_backup_*/
+batch_citation_sections*.csv
+extracted_citations*.csv
+etl/extract_citations_batch.py.bak
