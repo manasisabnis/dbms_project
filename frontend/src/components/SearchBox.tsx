@@ -17,10 +17,10 @@ type CaseSearchResponse = {
   cases: CaseSearchResult[];
 };
 
-export default function SearchBox() {
+export default function SearchBox({ initial = "" }: { initial?: string }) {
   const router = useRouter();
 
-  const [text, setText] = useState("");
+  const [text, setText] = useState(initial);
   const [results, setResults] = useState<CaseSearchResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
