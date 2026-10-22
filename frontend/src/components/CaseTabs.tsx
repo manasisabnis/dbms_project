@@ -194,14 +194,11 @@ export function JudgesTab({ detail }: { detail: ApiState<CaseDetail> }) {
 export function StatutesTab({ detail }: { detail: ApiState<CaseDetail> }) {
   return (
     <Loaded state={detail}>
-      {(d) =>
-<<<<<<< Updated upstream
-        !d.statutes?.length ? (
-          <Notice text="Statute details are not available in the current dataset." />
-=======
-        (d.statutes ?? []).length === 0 ? (
+      {(d) => {
+        const statutes = d.statutes ?? [];
+
+        return statutes.length === 0 ? (
           <Notice text="No statutes recorded for this case." />
->>>>>>> Stashed changes
         ) : (
           <div className={BOX}>
             <table className="w-full text-sm">
@@ -214,7 +211,7 @@ export function StatutesTab({ detail }: { detail: ApiState<CaseDetail> }) {
                 </tr>
               </thead>
               <tbody>
-                {(d.statutes ?? []).map((s) => (
+                {statutes.map((s) => (
                   <tr key={s.statute_id} className="border-b last:border-0">
                     <td className="py-2 font-medium">{s.act_name}</td>
                     <td className="py-2 text-slate-600">{s.section ?? "-"}</td>
@@ -225,12 +222,11 @@ export function StatutesTab({ detail }: { detail: ApiState<CaseDetail> }) {
               </tbody>
             </table>
           </div>
-        )
-      }
+        );
+      }}
     </Loaded>
   );
 }
-
 export function FullTextTab({ detail }: { detail: ApiState<CaseDetail> }) {
   return (
     <Loaded state={detail}>
