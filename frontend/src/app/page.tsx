@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import CaseTable from "@/components/CaseTable";
+import LandmarkList from "@/components/LandmarkList";
 import SearchBox from "@/components/SearchBox";
 import StatCard from "@/components/StatCard";
 import WindowToggle from "@/components/WindowToggle";
@@ -50,6 +51,8 @@ export default function Dashboard() {
           </section>
         </>
       )}
+
+      <LandmarkList />
     </div>
   );
 }

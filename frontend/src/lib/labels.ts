@@ -17,6 +17,14 @@ export const LABEL_STYLE: Record<Label, string> = {
   regular: "bg-slate-100 text-slate-700",
 };
 
+export const LABEL_EXPLANATION: Record<Label, string> = {
+  emerging: "Citations are rising sharply compared with the previous period.",
+  declining: "Citations have dropped sharply compared with the previous period.",
+  established: "Consistently high citation activity year after year.",
+  recent: "A recently decided case that is already being cited.",
+  regular: "Cited at a modest, stable level. No strong trend.",
+};
+
 export function formatGrowth(pct: number): string {
   return `${pct > 0 ? "+" : ""}${Math.round(pct)}%`;
 }

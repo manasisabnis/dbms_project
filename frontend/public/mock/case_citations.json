@@ -1,0 +1,11 @@
+{
+  "case_id": 1530,
+  "total": 3,
+  "page": 1,
+  "page_size": 10,
+  "results": [
+    {"citing_case_id": 310, "case_name": "Ramesh Kumar v. State of Kerala", "case_number": "AIR 2024 SC 112", "judgment_date": "2024-08-20", "context_text": "The principle was explained in the earlier decision and applies equally here.", "page_number": 12},
+    {"citing_case_id": 415, "case_name": "Meera Nair v. Municipal Corporation", "case_number": "AIR 2025 SC 48", "judgment_date": "2025-02-10", "context_text": "Reliance is placed on the reasoning on maintainability of the appeal.", "page_number": 7},
+    {"citing_case_id": 502, "case_name": "Anil Verma v. Excise Commissioner", "case_number": "AIR 2025 SC 301", "judgment_date": "2025-05-03", "context_text": null, "page_number": null}
+  ]
+}
