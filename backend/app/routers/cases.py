@@ -23,6 +23,11 @@ CASE_FIELDS = {
     "neutral_citation": 1,
     "law_report_citation": 1,
     "source_pdf_s3_url": 1,
+    "case_type_basis": 1,
+    "bench_name": 1,
+    "coram_members_text": 1,
+    "judges": 1,
+    "source_json_s3_url": 1,
 }
 
 
