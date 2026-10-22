@@ -73,7 +73,8 @@ def get_case(case_id: int, db=Depends(get_db)):
         raise HTTPException(
             status_code=500,
             detail="Unable to retrieve the case.",
-        ) from exc\n
+        ) from exc
+
 
 @router.get("/landmark-cases")
 def landmark_cases(
@@ -121,4 +122,4 @@ def landmark_cases(
             status_code=500,
             detail="Unable to retrieve landmark cases.",
         ) from exc
-\n
+
