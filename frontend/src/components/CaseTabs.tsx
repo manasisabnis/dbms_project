@@ -190,14 +190,18 @@ export function JudgesTab({ detail }: { detail: ApiState<CaseDetail> }) {
     </Loaded>
   );
 }
-
 export function StatutesTab({ detail }: { detail: ApiState<CaseDetail> }) {
   return (
     <Loaded state={detail}>
+<<<<<<< Updated upstream
       {(d) => {
         const statutes = d.statutes ?? [];
 
         return statutes.length === 0 ? (
+=======
+      {(d) =>
+        (d.statutes ?? []).length === 0 ? (
+>>>>>>> Stashed changes
           <Notice text="No statutes recorded for this case." />
         ) : (
           <div className={BOX}>
@@ -211,7 +215,11 @@ export function StatutesTab({ detail }: { detail: ApiState<CaseDetail> }) {
                 </tr>
               </thead>
               <tbody>
+<<<<<<< Updated upstream
                 {statutes.map((s) => (
+=======
+                {(d.statutes ?? []).map((s) => (
+>>>>>>> Stashed changes
                   <tr key={s.statute_id} className="border-b last:border-0">
                     <td className="py-2 font-medium">{s.act_name}</td>
                     <td className="py-2 text-slate-600">{s.section ?? "-"}</td>
