@@ -162,42 +162,51 @@ export function CitedByTab({ caseId }: { caseId: string }) {
 export function JudgesTab({ detail }: { detail: ApiState<CaseDetail> }) {
   return (
     <Loaded state={detail}>
+<<<<<<< Updated upstream
       {(d) =>
         !d.judges?.length ? (
           <Notice text="Judge details are not available in the current dataset." />
+=======
+      {(d) => {
+        const judges = Array.isArray(d.judges) && d.judges.length
+          ? d.judges
+          : (d.coram_members_text ?? "")
+              .split(";")
+              .map((name) => name.trim())
+              .filter(Boolean);
+
+        return judges.length === 0 ? (
+          <Notice text="No judges recorded for this case." />
+>>>>>>> Stashed changes
         ) : (
           <div className={BOX}>
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b text-left text-xs text-slate-500">
-                  <th className="pb-2 font-medium">Judge</th>
-                  <th className="pb-2 font-medium">Designation</th>
-                  <th className="pb-2 font-medium">Role in this case</th>
-                </tr>
-              </thead>
-              <tbody>
-                {d.judges.map((j) => (
-                  <tr key={j.judge_id} className="border-b last:border-0">
-                    <td className="py-2 font-medium">{j.name}</td>
-                    <td className="py-2 text-slate-600">{j.designation ?? "-"}</td>
-                    <td className="py-2 text-slate-600">{j.role_in_case ?? "-"}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <h3 className="font-semibold">
+              Bench: {d.bench_name ?? `${judges.length} judges`}
+            </h3>
+            <ul className="mt-3 list-disc pl-5">
+              {judges.map((name, index) => (
+                <li key={`${name}-${index}`} className="py-1">
+                  {name}
+                </li>
+              ))}
+            </ul>
           </div>
-        )
-      }
+        );
+      }}
     </Loaded>
   );
 }
-
 export function StatutesTab({ detail }: { detail: ApiState<CaseDetail> }) {
   return (
     <Loaded state={detail}>
       {(d) =>
+<<<<<<< Updated upstream
         !d.statutes?.length ? (
           <Notice text="Statute details are not available in the current dataset." />
+=======
+        (d.statutes ?? []).length === 0 ? (
+          <Notice text="No statutes recorded for this case." />
+>>>>>>> Stashed changes
         ) : (
           <div className={BOX}>
             <table className="w-full text-sm">
@@ -210,7 +219,7 @@ export function StatutesTab({ detail }: { detail: ApiState<CaseDetail> }) {
                 </tr>
               </thead>
               <tbody>
-                {d.statutes.map((s) => (
+                {(d.statutes ?? []).map((s) => (
                   <tr key={s.statute_id} className="border-b last:border-0">
                     <td className="py-2 font-medium">{s.act_name}</td>
                     <td className="py-2 text-slate-600">{s.section ?? "-"}</td>
