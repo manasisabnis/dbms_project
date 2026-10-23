@@ -235,52 +235,92 @@ export function StatutesTab({ detail }: { detail: ApiState<CaseDetail> }) {
     </Loaded>
   );
 }
+function individualDocumentUrl(
+  raw: string | null | undefined,
+  type: "pdf" | "metadata"
+): string | null {
+  if (!raw) return null;
+
+  try {
+    const url = new URL(raw);
+    const member = new URLSearchParams(
+      url.hash.replace(/^#/, "")
+    ).get("member");
+
+    const year = url.pathname.match(/year=(\d{4})/)?.[1];
+
+    if (member && year) {
+      const filename = encodeURIComponent(member.split("/").pop()!);
+
+      if (type === "pdf") {
+        return `${url.origin}/data/pdf/year=${year}/english/${filename}`;
+      }
+
+      return `${url.origin}/metadata/json/year=${year}/${filename}`;
+    }
+
+    if (/\.tar$/i.test(url.pathname)) return null;
+
+    return raw;
+  } catch {
+    return null;
+  }
+}
+
 export function FullTextTab({ detail }: { detail: ApiState<CaseDetail> }) {
   return (
     <Loaded state={detail}>
       {(d) => {
-        const pdf = d.pdf_url || d.source_pdf_s3_url;
-        const metadata = d.source_json_s3_url;
-
-        if (!pdf && !metadata) {
-          return <Notice text="No document source is recorded for this case." />;
-        }
-
-        const isArchive = Boolean(
-          pdf && (pdf.includes(".tar#") || pdf.endsWith(".tar"))
+        const pdfUrl = individualDocumentUrl(
+          d.pdf_url || d.source_pdf_s3_url,
+          "pdf"
         );
 
-        return (
-          <div className={`${BOX} space-y-4`}>
-            <h3 className="font-semibold">Judgment document sources</h3>
+        const metadataUrl = individualDocumentUrl(
+          d.source_json_s3_url,
+          "metadata"
+        );
 
-            {pdf && (
-              <div>
-                <a
-                  href={pdf}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="break-all text-blue-700 underline"
-                >
-                  Open judgment source
-                </a>
-                {isArchive && (
-                  <p className="mt-2 text-sm text-amber-700">
-                    This judgment is referenced inside a TAR archive and may not open as a standalone PDF.
-                  </p>
-                )}
-              </div>
+        if (!pdfUrl && !metadataUrl) return null;
+
+        return (
+          <div className="space-y-4">
+            {pdfUrl && (
+              <section className={`${BOX} space-y-3`}>
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <h3 className="font-semibold">Judgment Full Text</h3>
+                  <a
+                    href={pdfUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-sm text-blue-700 underline"
+                  >
+                    Open PDF in new tab
+                  </a>
+                </div>
+
+                <iframe
+                  src={pdfUrl}
+                  title={`Judgment PDF: ${d.case_name}`}
+                  className="h-[75vh] w-full rounded-lg border border-slate-200"
+                />
+              </section>
             )}
 
-            {metadata && (
-              <a
-                href={metadata}
-                target="_blank"
-                rel="noreferrer"
-                className="block break-all text-blue-700 underline"
-              >
-                Open metadata source
-              </a>
+            {metadataUrl && (
+              <details className={BOX}>
+                <summary className="cursor-pointer font-medium">
+                  Source metadata
+                </summary>
+                <a
+                  href={metadataUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="mt-3 block break-all text-sm text-blue-700 underline"
+                >
+                  Open individual metadata JSON
+                </a>
+              </details>
             )}
           </div>
         );
@@ -288,3 +328,4 @@ export function FullTextTab({ detail }: { detail: ApiState<CaseDetail> }) {
     </Loaded>
   );
 }
+
