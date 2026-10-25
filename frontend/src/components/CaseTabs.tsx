@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { API_URL } from "@/lib/api";
 import { useState } from "react";
 import { CourtDonut, CumulativeLine, YearlyBars } from "@/components/Charts";
 import LabelBadge from "@/components/LabelBadge";
@@ -187,9 +188,12 @@ export function JudgesTab({ detail }: { detail: ApiState<CaseDetail> }) {
               Bench: {d.bench_name ?? `${judges.length} judges`}
             </h3>
             <ul className="mt-3 list-disc pl-5">
-              {judges.map((name, index) => (
-                <li key={`${name}-${index}`} className="py-1">
-                  {name}
+              { judges.map((judge, index) => (
+                <li
+                  key={`${typeof judge === "string" ? judge : judge.name}-${index}`}
+                  className="py-1"
+                >
+                  {typeof judge === "string" ? judge : judge.name}
                 </li>
               ))}
             </ul>
@@ -267,65 +271,45 @@ function individualDocumentUrl(
   }
 }
 
-export function FullTextTab({ detail }: { detail: ApiState<CaseDetail> }) {
+
+export function FullTextTab({
+  detail,
+}: {
+  detail: ApiState<CaseDetail>;
+}) {
   return (
     <Loaded state={detail}>
       {(d) => {
-        const pdfUrl = individualDocumentUrl(
-          d.pdf_url || d.source_pdf_s3_url,
-          "pdf"
-        );
+        if (!d.source_pdf_s3_url && !d.pdf_url) {
+          return <Notice text="No PDF source is recorded for this case." />;
+        }
 
-        const metadataUrl = individualDocumentUrl(
-          d.source_json_s3_url,
-          "metadata"
-        );
-
-        if (!pdfUrl && !metadataUrl) return null;
+        const pdfUrl =
+          `${API_URL.replace(/\/+$/, "")}/api/cases/${d.case_id}/pdf`;
 
         return (
-          <div className="space-y-4">
-            {pdfUrl && (
-              <section className={`${BOX} space-y-3`}>
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <h3 className="font-semibold">Judgment Full Text</h3>
-                  <a
-                    href={pdfUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="text-sm text-blue-700 underline"
-                  >
-                    Open PDF in new tab
-                  </a>
-                </div>
+          <section className={`${BOX} space-y-3`}>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <h3 className="font-semibold">Judgment Full Text</h3>
 
-                <iframe
-                  src={pdfUrl}
-                  title={`Judgment PDF: ${d.case_name}`}
-                  className="h-[75vh] w-full rounded-lg border border-slate-200"
-                />
-              </section>
-            )}
+              <a
+                href={pdfUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="text-sm text-blue-700 underline"
+              >
+                Open PDF in new tab
+              </a>
+            </div>
 
-            {metadataUrl && (
-              <details className={BOX}>
-                <summary className="cursor-pointer font-medium">
-                  Source metadata
-                </summary>
-                <a
-                  href={metadataUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="mt-3 block break-all text-sm text-blue-700 underline"
-                >
-                  Open individual metadata JSON
-                </a>
-              </details>
-            )}
-          </div>
+            <iframe
+              src={pdfUrl}
+              title={`Judgment PDF: ${d.case_name}`}
+              className="h-[75vh] w-full rounded-lg border border-slate-200"
+            />
+          </section>
         );
       }}
     </Loaded>
   );
 }
-
