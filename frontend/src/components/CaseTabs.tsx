@@ -292,21 +292,17 @@ export function FullTextTab({
             <div className="flex flex-wrap items-center justify-between gap-2">
               <h3 className="font-semibold">Judgment Full Text</h3>
 
-              <a
-                href={pdfUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="text-sm text-blue-700 underline"
-              >
+              <a href={pdfUrl} target="_blank" rel="noreferrer">
                 Open PDF in new tab
               </a>
+
             </div>
 
             <iframe
-              src={pdfUrl}
-              title={`Judgment PDF: ${d.case_name}`}
-              className="h-[75vh] w-full rounded-lg border border-slate-200"
-            />
+                src={pdfUrl}
+                title={`Judgment PDF: ${d.case_name}`}
+                className="h-[75vh] w-full rounded-lg border border-slate-200"
+              />
           </section>
         );
       }}
