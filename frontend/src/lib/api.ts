@@ -10,7 +10,7 @@ export const API_URL =
  * The MongoDB endpoints (dashboard, citation-trend) are ALWAYS real.
  * When her API is ready, create frontend/.env.local containing:  NEXT_PUBLIC_USE_MOCKS=false
  */
-export const USE_MOCKS = process.env.NEXT_PUBLIC_USE_MOCKS !== "false";
+export const USE_MOCKS = process.env.NEXT_PUBLIC_USE_MOCKS === "true";
 
 export type Label = "emerging" | "declining" | "established" | "recent" | "regular";
 export type WindowYears = 1 | 3 | 5;
@@ -92,15 +92,24 @@ export interface CaseDetail {
   case_number: string | null;
   judgment_date: string;
   court_name: string | null;
-  court_level: string | null;
+  court_level?: string | null;
   case_type: string | null;
+  case_type_basis?: string | null;
   decision: string | null;
-  pdf_url: string | null;
-  judges: Judge[];
-  statutes: Statute[];
 
+  location?: string | null;
+  cnr_number?: string | null;
+  neutral_citation?: string | null;
+  law_report_citation?: string | null;
+  bench_name?: string | null;
+  coram_members_text?: string | null;
+
+  pdf_url?: string | null;
   source_pdf_s3_url?: string | null;
   source_json_s3_url?: string | null;
+
+  judges: Judge[];
+  statutes?: Statute[];
 }
 
 export interface CitedByItem {

@@ -18,14 +18,19 @@ function Notice({ text }: { text: string }) {
 }
 
 function Row({ label, value }: { label: string; value: string | null | undefined }) {
+  if (value == null || value.trim() === "" || value.trim() === "-") {
+    return null;
+  }
+
   return (
     <tr className="border-b last:border-0">
-      <th className="w-40 py-2 pr-4 text-left text-sm font-medium text-slate-500">{label}</th>
-      <td className="py-2 text-sm">{value || "-"}</td>
+      <th className="w-40 py-2 pr-4 text-left text-sm font-medium text-slate-500">
+        {label}
+      </th>
+      <td className="py-2 text-sm">{value}</td>
     </tr>
   );
 }
-
 /** Wraps the three states every detail tab has: loading, error, data. */
 function Loaded<T>({ state, children }: { state: ApiState<T>; children: (data: T) => React.ReactNode }) {
   if (state.error) return <Notice text={state.error} />;
@@ -36,25 +41,32 @@ function Loaded<T>({ state, children }: { state: ApiState<T>; children: (data: T
 export function OverviewTab({ detail, trend }: { detail: ApiState<CaseDetail>; trend: ApiState<CaseTrendResponse> }) {
   return (
     <div className="grid gap-4 lg:grid-cols-3">
-      <div className={`${BOX} lg:col-span-2`}>
+      <div className={`${BOX} min-w-0 lg:col-span-2`}>
         <h3 className="mb-3 font-semibold">Case information</h3>
         <Loaded state={detail}>
           {(d) => (
             <table className="w-full">
               <tbody>
-                <Row label="Case name" value={trend.data?.case_name ?? d.case_name} />
+                <Row label="Case ID" value={String(d.case_id)} />
+                <Row label="Case name" value={d.case_name} />
                 <Row label="Case number" value={d.case_number} />
                 <Row label="Judgment date" value={d.judgment_date} />
                 <Row label="Court" value={d.court_name} />
+                <Row label="Court level" value={d.court_level} />
+                <Row label="Location" value={d.location} />
                 <Row label="Case type" value={d.case_type} />
+                <Row label="Case type basis" value={d.case_type_basis} />
                 <Row label="Decision" value={d.decision} />
-                <Row label="Judges" value={d.judges.length ? `${d.judges.length} on the bench` : null} />
+                <Row label="Bench" value={d.bench_name} />
+                <Row label="Judges" value={d.judges?.join(", ") || d.coram_members_text} />
+                <Row label="CNR number" value={d.cnr_number} />
+                <Row label="Neutral citation" value={d.neutral_citation} />
+                <Row label="Law report citation" value={d.law_report_citation} />
               </tbody>
             </table>
           )}
         </Loaded>
       </div>
-
       <div className="space-y-4">
         {trend.data ? (
           <>
@@ -67,14 +79,11 @@ export function OverviewTab({ detail, trend }: { detail: ApiState<CaseDetail>; t
               <p className="text-sm text-slate-600">{LABEL_EXPLANATION[trend.data.label]}</p>
             </div>
           </>
-        ) : (
-          <Notice text={trend.loading ? "Loading citation statistics…" : "No citation statistics for this case yet."} />
-        )}
+        ) : null}
       </div>
     </div>
   );
 }
-
 export function AnalysisTab({ trend }: { trend: ApiState<CaseTrendResponse> }) {
   const [windowYears, setWindowYears] = useState<WindowYears>(3);
 
@@ -163,69 +172,103 @@ export function CitedByTab({ caseId }: { caseId: string }) {
 export function JudgesTab({ detail }: { detail: ApiState<CaseDetail> }) {
   return (
     <Loaded state={detail}>
-      {(d) =>
-        d.judges.length === 0 ? (
+      {(d) => {
+        const judges = Array.isArray(d.judges) && d.judges.length
+          ? d.judges
+          : (d.coram_members_text ?? "")
+              .split(";")
+              .map((name) => name.trim())
+              .filter(Boolean);
+
+        return judges.length === 0 ? (
           <Notice text="No judges recorded for this case." />
         ) : (
           <div className={BOX}>
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b text-left text-xs text-slate-500">
-                  <th className="pb-2 font-medium">Judge</th>
-                  <th className="pb-2 font-medium">Designation</th>
-                  <th className="pb-2 font-medium">Role in this case</th>
-                </tr>
-              </thead>
-              <tbody>
-                {d.judges.map((j) => (
-                  <tr key={j.judge_id} className="border-b last:border-0">
-                    <td className="py-2 font-medium">{j.name}</td>
-                    <td className="py-2 text-slate-600">{j.designation ?? "-"}</td>
-                    <td className="py-2 text-slate-600">{j.role_in_case ?? "-"}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <h3 className="font-semibold">
+              Bench: {d.bench_name ?? `${judges.length} judges`}
+            </h3>
+            <ul className="mt-3 list-disc pl-5">
+              { judges.map((judge, index) => (
+                <li
+                  key={`${typeof judge === "string" ? judge : judge.name}-${index}`}
+                  className="py-1"
+                >
+                  {typeof judge === "string" ? judge : judge.name}
+                </li>
+              ))}
+            </ul>
           </div>
-        )
-      }
+        );
+      }}
     </Loaded>
   );
 }
-
 export function StatutesTab({ detail }: { detail: ApiState<CaseDetail> }) {
   return (
     <Loaded state={detail}>
-      {(d) =>
-        d.statutes.length === 0 ? (
-          <Notice text="No statutes recorded for this case." />
-        ) : (
+      {(d) => {
+        const statutes = d.statutes ?? [];
+
+        return statutes.length === 0 ? null : (
           <div className={BOX}>
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b text-left text-xs text-slate-500">
-                  <th className="pb-2 font-medium">Act</th>
-                  <th className="pb-2 font-medium">Section</th>
-                  <th className="pb-2 font-medium">Description</th>
-                  <th className="pb-2 font-medium">Enacted</th>
-                </tr>
-              </thead>
-              <tbody>
-                {d.statutes.map((s) => (
-                  <tr key={s.statute_id} className="border-b last:border-0">
-                    <td className="py-2 font-medium">{s.act_name}</td>
-                    <td className="py-2 text-slate-600">{s.section ?? "-"}</td>
-                    <td className="py-2 text-slate-600">{s.description ?? "-"}</td>
-                    <td className="py-2 text-slate-600">{s.enactment_year ?? "-"}</td>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b text-left text-xs text-slate-500">
+                    <th className="pb-2 font-medium">Act</th>
+                    <th className="pb-2 font-medium">Section</th>
+                    <th className="pb-2 font-medium">Description</th>
+                    <th className="pb-2 font-medium">Enacted</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {statutes.map((s) => (
+                    <tr key={s.statute_id} className="border-b last:border-0">
+                      <td className="py-2 font-medium">{s.act_name}</td>
+                      <td className="py-2">{s.section ?? "-"}</td>
+                      <td className="py-2">{s.description ?? "-"}</td>
+                      <td className="py-2">{s.enactment_year ?? "-"}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
-        )
-      }
+        );
+      }}
     </Loaded>
   );
+}
+function individualDocumentUrl(
+  raw: string | null | undefined,
+  type: "pdf" | "metadata"
+): string | null {
+  if (!raw) return null;
+
+  try {
+    const url = new URL(raw);
+    const member = new URLSearchParams(
+      url.hash.replace(/^#/, "")
+    ).get("member");
+
+    const year = url.pathname.match(/year=(\d{4})/)?.[1];
+
+    if (member && year) {
+      const filename = encodeURIComponent(member.split("/").pop()!);
+
+      if (type === "pdf") {
+        return `${url.origin}/data/pdf/year=${year}/english/${filename}`;
+      }
+
+      return `${url.origin}/metadata/json/year=${year}/${filename}`;
+    }
+
+    if (/\.tar$/i.test(url.pathname)) return null;
+
+    return raw;
+  } catch {
+    return null;
+  }
 }
 
 
