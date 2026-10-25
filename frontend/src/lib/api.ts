@@ -1,7 +1,8 @@
 // Types mirror backend/app/schemas.py (Mongo endpoints) and contracts/api_contract.md (MySQL endpoints).
 // If the backend changes, change these too.
 
-export const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:8000";
+export const API_URL =
+  process.env.NEXT_PUBLIC_API_URL ?? "https://legal-citation-api.vercel.app";
 
 /**
  * MOCK MODE: until Manasi's MySQL endpoints exist, the search / case-details / cited-by /
@@ -97,6 +98,9 @@ export interface CaseDetail {
   pdf_url: string | null;
   judges: Judge[];
   statutes: Statute[];
+
+  source_pdf_s3_url?: string | null;
+  source_json_s3_url?: string | null;
 }
 
 export interface CitedByItem {

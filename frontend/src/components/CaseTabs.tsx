@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { API_URL } from "@/lib/api";
 import { useState } from "react";
 import { CourtDonut, CumulativeLine, YearlyBars } from "@/components/Charts";
 import LabelBadge from "@/components/LabelBadge";
@@ -227,21 +228,45 @@ export function StatutesTab({ detail }: { detail: ApiState<CaseDetail> }) {
   );
 }
 
-export function FullTextTab({ detail }: { detail: ApiState<CaseDetail> }) {
+
+export function FullTextTab({
+  detail,
+}: {
+  detail: ApiState<CaseDetail>;
+}) {
   return (
     <Loaded state={detail}>
-      {(d) =>
-        d.pdf_url ? (
-          <div className={BOX}>
-            <p className="mb-3 text-sm text-slate-600">The full judgment is hosted as a PDF.</p>
-            <a href={d.pdf_url} target="_blank" rel="noreferrer" className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">
-              Open judgment PDF
-            </a>
-          </div>
-        ) : (
-          <Notice text="No PDF link is available for this case." />
-        )
-      }
+      {(d) => {
+        if (!d.source_pdf_s3_url && !d.pdf_url) {
+          return <Notice text="No PDF source is recorded for this case." />;
+        }
+
+        const pdfUrl =
+          `${API_URL.replace(/\/+$/, "")}/api/cases/${d.case_id}/pdf`;
+
+        return (
+          <section className={`${BOX} space-y-3`}>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <h3 className="font-semibold">Judgment Full Text</h3>
+
+              <a
+                href={pdfUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="text-sm text-blue-700 underline"
+              >
+                Open PDF in new tab
+              </a>
+            </div>
+
+            <iframe
+              src={pdfUrl}
+              title={`Judgment PDF: ${d.case_name}`}
+              className="h-[75vh] w-full rounded-lg border border-slate-200"
+            />
+          </section>
+        );
+      }}
     </Loaded>
   );
 }

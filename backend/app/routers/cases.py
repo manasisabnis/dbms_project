@@ -263,6 +263,7 @@ def _extract_pdf_from_archive(archive_url, filename, case_id):
 
 @router.get("/cases/{case_id}/pdf")
 def get_case_pdf(case_id: int, db=Depends(get_db)):
+    """Resolve a judgment PDF from its stored source metadata."""
     row = db["case_catalog"].find_one(
         {"case_id": case_id},
         {
@@ -276,32 +277,34 @@ def get_case_pdf(case_id: int, db=Depends(get_db)):
         raise HTTPException(status_code=404, detail="Case not found.")
 
     archive_source = None
-    filename = None
+    archive_filename = None
 
-    # Prefer a real individual PDF; fall back to the TAR source.
-    for raw_url in (
-        row.get("pdf_url"),
-        row.get("source_pdf_s3_url"),
-    ):
+    # Prefer a valid individual PDF, but retain the archive fallback.
+    for raw_url in (row.get("pdf_url"), row.get("source_pdf_s3_url")):
         parsed = _parse_pdf_source(raw_url)
         if parsed is None:
             continue
 
-        name = _member_name(parsed)
-        if not name:
+        filename = _member_name(parsed)
+        if not filename:
             continue
 
-        
-        individual_names = [name]
+        candidates = [filename]
+        if filename.lower().endswith(".pdf"):
+            stem = filename[:-4]
+            candidates.extend([f"{stem}_EN.pdf", f"{stem}.pdf"])
 
-        if name.lower().endswith(".pdf"):
-            english_name = f"{name[:-4]}_EN.pdf"
-            if english_name.lower() != name.lower():
-                individual_names.append(english_name)
+        # Remove duplicate candidates without case sensitivity.
+        unique_candidates = []
+        seen = set()
+        for candidate in candidates:
+            key = candidate.casefold()
+            if key not in seen:
+                seen.add(key)
+                unique_candidates.append(candidate)
 
-        for individual_name in individual_names:
-            individual_url = _individual_pdf_url(parsed, individual_name)
-
+        for candidate in unique_candidates:
+            individual_url = _individual_pdf_url(parsed, candidate)
             if individual_url and _url_exists(individual_url):
                 return RedirectResponse(
                     individual_url,
@@ -309,32 +312,31 @@ def get_case_pdf(case_id: int, db=Depends(get_db)):
                     headers={"Cache-Control": "public, max-age=3600"},
                 )
 
-
+        # Keep the TAR source so missing individual files can be extracted.
         if "/data/tar/" in parsed.path and parsed.fragment:
             archive_source = _archive_url(parsed)
-            filename = name
-            break
+            archive_filename = filename
 
-    if not archive_source or not filename:
+    if not archive_source or not archive_filename:
         raise HTTPException(
             status_code=404,
-            detail="No supported PDF source is recorded for this case.",
+            detail="No available PDF source is recorded for this case.",
         )
 
     pdf_path = _extract_pdf_from_archive(
         archive_source,
-        filename,
+        archive_filename,
         case_id,
     )
 
     return FileResponse(
-        str(pdf_path),
-        media_type="application/pdf",
-        headers={
-            "Content-Disposition": f'inline; filename="{filename}"',
-            "Cache-Control": "public, max-age=3600",
-        },
-    )
+    path=str(pdf_path),
+    media_type="application/pdf",
+    headers={
+        "Content-Disposition": f'inline; filename="judgment-{case_id}.pdf"',
+        "Cache-Control": "public, max-age=3600",
+    },
+)
 
 @router.get("/landmark-cases")
 def landmark_cases(
