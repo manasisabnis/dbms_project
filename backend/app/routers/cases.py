@@ -291,14 +291,24 @@ def get_case_pdf(case_id: int, db=Depends(get_db)):
         if not name:
             continue
 
-        individual_url = _individual_pdf_url(parsed, name)
+        
+        individual_names = [name]
 
-        if individual_url and _url_exists(individual_url):
-            return RedirectResponse(
-                individual_url,
-                status_code=302,
-                headers={"Cache-Control": "public, max-age=3600"},
-            )
+        if name.lower().endswith(".pdf"):
+            english_name = f"{name[:-4]}_EN.pdf"
+            if english_name.lower() != name.lower():
+                individual_names.append(english_name)
+
+        for individual_name in individual_names:
+            individual_url = _individual_pdf_url(parsed, individual_name)
+
+            if individual_url and _url_exists(individual_url):
+                return RedirectResponse(
+                    individual_url,
+                    status_code=302,
+                    headers={"Cache-Control": "public, max-age=3600"},
+                )
+
 
         if "/data/tar/" in parsed.path and parsed.fragment:
             archive_source = _archive_url(parsed)
